@@ -164,9 +164,11 @@ wait until the poll finishes (at most 25 s); use a separate connection to keep e
 
 ### `document.inspect {depth?, allPages?}`
 
-The active document as JSON: id, name, path, dirty, `revision` (a counter that rises with every
-applied command, undo, redo and save of that document, so a client can tell whether it changed since
-it last read it; it restarts when the file is opened again), currentPage, selection, pages (the current page's
+The active document as JSON: id, name, path, dirty, `revision` (a counter that rises by one with every
+command applied to that document, read-only ones such as `file.saveAs {data: true}` and `doc.list`
+included, and with every selection change, undo, redo and save; reading it with `document.inspect`
+or `node.get` leaves it alone, so an unchanged value means nothing ran since; it restarts when the
+file is opened again), currentPage, selection, pages (the current page's
 layer tree to `depth`, default 8; others summarised unless `allPages`), styles, variable count,
 images, the colour profile (`colorProfile`: `srgb` or `displayP3`), the text being edited and the
 undo history.

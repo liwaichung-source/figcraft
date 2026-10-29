@@ -349,8 +349,9 @@ pub fn document(s: &Session, depth: usize, all_pages: bool) -> Value {
         "kind": doc.kind.id(),
         "path": ds.path,
         "dirty": ds.is_dirty(),
-        // Rises with every applied command, undo, redo and save: a client that read the document
-        // can tell whether it changed since, without diffing the tree.
+        // Rises by one with every command run on the document (read-only ones too), selection
+        // change, undo, redo and save; inspecting leaves it alone. An unchanged value tells a
+        // client that nothing ran since it last read the document.
         "revision": ds.revision,
         "currentPage": ds.page,
         "selection": ds.selection,
