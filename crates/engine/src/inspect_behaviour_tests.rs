@@ -341,6 +341,27 @@ fn inspected_json_reports_the_layer() {
 }
 
 #[test]
+fn inspected_document_reports_a_revision_that_every_change_raises() {
+    let mut s = Session::new();
+    let revision = |s: &Session| crate::inspect::document(s, 0, false)["revision"].as_u64().expect("revision is a number");
+    let start = revision(&s);
+    let r = rect(&mut s, 0.0, 0.0, 10.0, 10.0, None);
+    let edited = revision(&s);
+    assert!(edited > start, "creating and filling a layer raises it");
+    set(&mut s, &[r], json!({"opacity": 0.5}));
+    let set_once = revision(&s);
+    assert!(set_once > edited, "a property edit raises it, with the same undo label as before or not");
+    ex(&mut s, "edit.undo", json!({}));
+    assert!(revision(&s) > set_once, "undo raises it too: the document changed");
+    let undone = revision(&s);
+    ex(&mut s, "file.markSaved", json!({}));
+    assert!(revision(&s) > undone, "so does marking the file saved");
+    let before = revision(&s);
+    let _ = crate::inspect::document(&s, 8, true);
+    assert_eq!(revision(&s), before, "reading never changes it");
+}
+
+#[test]
 fn rem_conversion_leaves_names_alone() {
     let f = crate::codegen::px_to_rem;
     // Lengths convert, names ending in "px" don't.
